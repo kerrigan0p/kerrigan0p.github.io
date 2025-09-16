@@ -1,0 +1,11 @@
+title: "Theo Vandenhole"
+description: "Portfolio data: projets, métriques, démos"
+theme: minima
+# Navigation
+header_pages:
+  - projets.md
+  - a-propos.md
+# SEO de base
+timezone: Europe/Paris
+lang: fr
+markdown: kramdown
