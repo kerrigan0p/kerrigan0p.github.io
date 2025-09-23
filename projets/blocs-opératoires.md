@@ -1,0 +1,81 @@
+---
+layout: page
+title: "Acquisition de données - webscraping"
+permalink: /projets/blocs-opératoires/
+tags: [time-series, forecasting, mlops, python]
+---
+
+## Problème
+- Le centre hospitalier Princesse Grace situé à Monaco réalise plus de huit mille opérations chirurgicales chaque année. Ce centre dispose de quatre blocs opératoires fonctionnant cinq jours sur sept, homologués pour l'orthopédie. Après l’opération, le patient est transféré dans un service de soin.
+- Le coût de fonctionnement d’un bloc opératoire est estimé à 2000€/h et le coût d’un patient varie entre 500€/jour et 1500€/jour selon le service dans lequel ce dernier se situe. La part des ressources humaines compte pour plus de 60% dans ces montants. Les blocs opératoires représentent donc une charge importante et leur optimisation est un enjeu conséquent pour un centre hospitalier. 
+- Actuellement, les outils d’optimisation se concentrent sur le taux d’utilisation des salles de bloc opératoires et ces technologies reposent principalement sur des algorithmes génétiques. Néanmoins, la seule optimisation du taux d’utilisation crée des variations chaotiques du remplissage des lits dans les services de soins. Or, cette variation engendre des heures de sur-activité et de sous-activité pour le personnel, soignant ou non. Autrement dit, les méthodes actuelles déployées en production dégradent la gestion des ressources humaines. 
+[![Courbe occupation actuelle]( /assets/img/projets/blocs-opératoires/courbe-occupation-existant.png )]
+( /assets/img/projets/blocs-opératoires/courbe-occupation-existant.png )
+
+-L'objectif du projet est de démontrer qu'il est possible d'optimiser l'occupation des lits sans dégrader la performance d'utilisation des bblocs opératoires.
+
+[![Courbe occupation cible]( /assets/img/projets/blocs-opératoires/courbe-occupation-cible.png )]
+(/assets/img/projets/blocs-opératoires/courbe-occupation-cible.png )
+
+Par exemple, un lissage de la courbe d'occupation des lits permet de faire fonctionner le service sans qu'il n'y ait trop de personnes présentes et donc de faire des économies de budget.
+
+## Données
+- Source: Service chirurgie de l'hôpital Princesse Grace de Monaco.
+- Taille: 14000 lignes, 30 colonnes correspondant à toutes les opérations réalisées entre 2015 et 2023
+- Colonnes pertinentes : 
+    - Age 
+    - Sexe
+    - GHM_Code : La classification en groupes homogènes de malades 
+    - Chirurgien : Identité du chirurgien
+    - time_use_OR : Durée effective d'utilisation du bloc opératoire
+    - Duree_Sejour_hour : Durée d'occupation d'un lit après une opération
+
+## Modélisation du problème
+
+Le coeur de mon travail a été de modéliser le problème mathématiquement et de développer l'algorithme d'ordonnancement. 
+D'abord, il faut comprendre que les chirurgiens ont chacun des créneaux pour l'utilisation des 4 blocs opératoires de l'hopital. Ainsi, cela restreint fortement les possibilités quant à la planification des opérations. A partir de constat, on peut donc découper le problème en autant de petits problèmes qu'il n'y a de chirurgiens. Ce constat est très puissant car cela va permettre de réduire grandement la complexité du problème et de le traiter comme un problème de offline parallel dedicated machines. 
+
+Le seul défaut de cette approche consite à la mesure des indicateurs de performances. En effet, si chaque chirurgien est traité indépendemment, il est théoriquement possible que l'occupation des lits dépasse 100% ce qui engendrerait des limites physiques. Ceci peut être empêché par une limite fixée à chaque chirurgien en fonction de son nombre de créneaux.
+
+Les ndicateurs calculés se ront les suivants : 
+- UT : taux 'activité du bloc opératoire sur ses créneaux ouverts
+- OC : temps effective dans lequel un patient va rester dans un lit. Par exemple si l'on opère un patient qui a besoin de h de récupération avant de pouvoir repartir, il vaut mieux l'opérer le matin que le soir pour éviter qu'il ne passe la nuit à l'hopital.
+
+## Système multi agents
+
+Afin d'optimiser ce problème qui est multidimensionnel, j'ai fait le choix d'associer à chaque chirurgien une liste d'opérations de longueur n, des créneaux et une permutation de longueur n qui représentera simplement l'ordre dans lequel les opérations seront effectuées. La variable à optimiser sera la permutation.
+
+Afin d'optimiser les deux métriques en même temps, nous faisons l'hypothèse suivante : 
+"Comme il existe au moins une meilleure permutation, d'après le théorème de décomposition en produit de cycles à supports disjoints, cette ou ces permutations optimales ont des cycles à supports disjoints communs. Ainsi, ces cycles optimaux doivent être conserver par un algorithme optimisant l'un ou l'autre des critères." 
+
+En partant de cette hypothèse, nous construisons alors un système multi agents où il y a deux types d'agents définis par des hyper paramètres. Chaque agent optimisera, grâce à une méthode génétique, l'un ou l'autre des critères et prendra en entrée la sortie de l'agent précédent. 
+
+L'optimisation de ce système multi agents repose sur le bon choix des hyper paramètres, ainsi pour savoir lesquels sont les meilleurs il faut réaliser de nombreuses heures de simulations. Ces hyper paramètres sont les suivants : 
+- Nombre d'échange entre les agents
+- Nombre de mutation dans l'algorithme génétique d'un agent (une mutation est une transposition simple faite avec la permutation modifiée)
+- Nombre de crossovers dans l'algorithme génétique d'un agent (le crossover est la composition des permutations considérées)
+- Nombre d'itérations sans amélioration avant arrêt
+- Premier agent à utiliser
+
+## Résultats
+
+Pour évaluer les meilleurs hyperparamètres, on applique la méthode train-test :
+[![Train - test split]( /assets/img/projets/blocs-opératoires/traintest.png )]
+(/assets/img/projets/blocs-opératoires/traintest.png )
+
+Après avoir sélectionner les meilleurs résultats, on décide de réaliser 400 simulations de l'ensemble de test sur chacune d'elles pour obtenir les résultats suivants : 
+[![Résultats]( /assets/img/projets/blocs-opératoires/result.png )]
+(/assets/img/projets/blocs-opératoires/result.png )
+
+Une réprésentation visuelle des résultats montre que l'application de l'algorithme a tendance à charger le mardi plus que les autres jours mais qu'en contrepartie, tous les autres jours ont un taux d'occupation plus faible et en particulier le weekend. 
+
+[![Occupation lits non optimisées]( /assets/img/projets/blocs-opératoires/litsavant.png )]
+(/assets/img/projets/blocs-opératoires/litsavant.png )
+
+[![Occupation lits optimisées]( /assets/img/projets/blocs-opératoires/litsaprès.png )]
+(/assets/img/projets/blocs-opératoires/litsaprès.png )
+
+
+## Pistes suivantes
+- Pour réaliser des économies bien plus mesurables, il faut aller plus loin et intégrer les postes de coût RH précis afin d'affiner la définition des critères.
+
