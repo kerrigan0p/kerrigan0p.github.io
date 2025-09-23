@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "Projets"
-permalink: /projets/
+permalink: /projets
 ---
 ### Projet DentalHub - Comparateur de produits dentaires 
 - Impact: Plus de 100k données/j, fraîcheur < 24 h, 
@@ -13,7 +13,7 @@ permalink: /projets/
 - Impact: Optimisation de l'utilisation d'un service de blocs opératoires
 - Coût : Réduction théorique de 22% des coûts
 - Stack: Python, Algorithmes génétiques, Multi-agents
-- 🔗 [Étude](./projets/blocs-opératoires/)
+- 🔗 [Étude](./projets/blocs-operatoires/)
 
 ### Matching de catalogues — 100k/j
 - Impact: Liaison entre produits similaires sur sites différents

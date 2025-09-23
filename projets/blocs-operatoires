@@ -12,7 +12,7 @@ tags: [time-series, forecasting, mlops, python]
 [![Courbe occupation actuelle]( /assets/img/projets/blocs-opératoires/courbe-occupation-existant.png )]
 ( /assets/img/projets/blocs-opératoires/courbe-occupation-existant.png )
 
--L'objectif du projet est de démontrer qu'il est possible d'optimiser l'occupation des lits sans dégrader la performance d'utilisation des bblocs opératoires.
+-L'objectif du projet est de démontrer qu'il est possible d'optimiser l'occupation des lits sans dégrader la performance d'utilisation des blocs opératoires.
 
 [![Courbe occupation cible]( /assets/img/projets/blocs-opératoires/courbe-occupation-cible.png )]
 (/assets/img/projets/blocs-opératoires/courbe-occupation-cible.png )
