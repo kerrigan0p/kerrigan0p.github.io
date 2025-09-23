@@ -1,8 +1,7 @@
 ---
 layout: page
-title: "Acquisition de données - webscraping"
-permalink: /projets/blocs-opératoires/
-tags: [time-series, forecasting, mlops, python]
+title: "Optimisation de planning"
+permalink: /blocs-opératoires/
 ---
 
 ## Problème

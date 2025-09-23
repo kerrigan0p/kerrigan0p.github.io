@@ -13,7 +13,7 @@ permalink: /projets
 - Impact: Optimisation de l'utilisation d'un service de blocs opératoires
 - Coût : Réduction théorique de 22% des coûts
 - Stack: Python, Algorithmes génétiques, Multi-agents
-- 🔗 [Étude](./projets/blocs-operatoires/)
+- 🔗 [Étude](./blocs-operatoires/)
 
 ### Matching de catalogues — 100k/j
 - Impact: Liaison entre produits similaires sur sites différents
